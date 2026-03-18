@@ -175,7 +175,7 @@ This project supports:
 
 ## 👨‍💻 Author
 
-**Vishvanth A**
+****
 
 ---
 
@@ -194,3 +194,9 @@ If you like this project:
 * 🚀 Share it
 
 ---
+
+To Run The app.py file you need to run the following commands.
+python app.py
+
+---
+
