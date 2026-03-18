@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEX | AI Traffic Command (Azure)</title>
+
+    <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css">
+    <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #22c55e;
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(2, 6, 23, 0.7);
+        }
+
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-dark); color: white; overflow: hidden; }
+        
+        nav { 
+            padding: 15px; 
+            background: #020617; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-btn {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 12px;
+            border: 1px solid #334155;
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 380px; height: calc(100vh - 60px); }
+        
+        #map { width: 100%; height: 100%; filter: invert(90%) hue-rotate(180deg) brightness(95%); }
+
+        .panel { 
+            padding: 25px; 
+            background: var(--panel-bg); 
+            backdrop-filter: blur(15px); 
+            border-left: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h3 { margin-top: 0; color: var(--primary); letter-spacing: 1px; font-size: 18px; }
+
+        label { font-size: 11px; color: #94a3b8; font-weight: bold; }
+
+        select { 
+            width: 100%; 
+            padding: 12px; 
+            background: #1e293b; 
+            color: white; 
+            border: 1px solid #334155; 
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .btn-main { 
+            padding: 14px; 
+            width: 100%; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; 
+            border: none; 
+            border-radius: 10px;
+            cursor: pointer; 
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-main:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .btn-analysis {
+            display: none;
+            padding: 14px;
+            width: 100%;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        #status { 
+            background: rgba(0,0,0,0.3); 
+            padding: 15px; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            line-height: 1.6;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .signal-link {
+            font-size: 11px;
+            text-align: center;
+            color: #64748b;
+            text-decoration: none;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav>
+    <a href="index.html" class="nav-btn">← LOGOUT</a>
+    <div style="letter-spacing: 2px; font-weight: 800;">🚦 CODEX AI COMMAND</div>
+    <div style="width: 70px;"></div>
+</nav>
+
+<div class="grid">
+    <div id="map"></div>
+
+    <div class="panel">
+        <h3>Route Intelligence</h3>
+
+        <div class="input-group">
+            <label>SOURCE ORIGIN</label>
+            <select id="source">
+                <option>Anekal</option><option>Chandapura</option><option>Jigani</option>
+                <option>Electronic City</option><option>Silk Board</option><option>BTM</option>
+                <option>Jayanagar</option><option>Lalbagh</option><option>Shantinagar</option>
+                <option>KR Market</option><option>KBS</option><option>Banashankari</option>
+                <option>Kengeri</option><option>Satellite</option><option>KR Puram</option><option>Whitefield</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>DESTINATION NODE</label>
+            <select id="destination">
+                <option>Whitefield</option><option>KR Puram</option><option>KBS</option>
+                <option>KR Market</option><option>Shantinagar</option><option>Lalbagh</option>
+                <option>Jayanagar</option><option>BTM</option><option>Silk Board</option>
+                <option>Electronic City</option><option>Jigani</option><option>Chandapura</option>
+                <option>Anekal</option><option>Banashankari</option><option>Kengeri</option><option>Satellite</option>
+            </select>
+        </div>
+
+        <button class="btn-main" onclick="findRoute()">ANALYZE REAL-TIME ROUTE</button>
+        
+        <a href="analysis.html" id="analysisBtn" class="btn-analysis">VIEW DETAILED AI ANALYSIS →</a>
+
+        <div id="status">Ready for system synchronization...</div>
+
+        
+    </div>
+</div>
+
+<script>
+let map, datasource;
+const AZURE_KEY = '73cx8nVOkRIoUoy0SSjmWeDRNzDB0PdsiVbdsAfOxVEJihrsvNOWJQQJ99CCACYeBjFVCOd4AAAgAZMPNQyd';
+
+function initMap() {
+    map = new atlas.Map('map', {
+        center: [77.5946, 12.9716], // Bangalore
+        zoom: 11,
+        view: 'Auto',
+        authOptions: {
+            authType: 'subscriptionKey',
+            subscriptionKey: AZURE_KEY
+        }
+    });
+
+    map.events.add('ready', function () {
+        // Real-time Traffic flow
+        map.setTraffic({ flow: 'relative', incidents: true });
+
+        datasource = new atlas.source.DataSource();
+        map.sources.add(datasource);
+
+        map.layers.add(new atlas.layer.LineLayer(datasource, null, {
+            strokeColor: '#6366f1',
+            strokeWidth: 6,
+            lineJoin: 'round',
+            lineCap: 'round'
+        }));
+    });
+}
+
+async function getCoordinates(place) {
+    let url = `https://atlas.microsoft.com/search/address/json?api-version=1.0&query=${place} Bangalore&subscription-key=${AZURE_KEY}`;
+    let response = await fetch(url);
+    let data = await response.json();
+    return data.results[0].position;
+}
+
+async function findRoute() {
+    const status = document.getElementById("status");
+    const analysisBtn = document.getElementById("analysisBtn");
+    
+    status.innerHTML = "<span style='color:var(--primary)'>📡 Syncing with Azure Traffic Nodes...</span>";
+    if ("vibrate" in navigator) navigator.vibrate(50);
+
+    try {
+        let sName = document.getElementById("source").value;
+        let dName = document.getElementById("destination").value;
+
+        let start = await getCoordinates(sName);
+        let end = await getCoordinates(dName);
+
+        let routeURL = `https://atlas.microsoft.com/route/directions/json?api-version=1.0&query=${start.lat},${start.lon}:${end.lat},${end.lon}&traffic=true&subscription-key=${AZURE_KEY}`;
+
+        let response = await fetch(routeURL);
+        let data = await response.json();
+
+        let route = data.routes[0].legs[0].points.map(p => [p.longitude, p.latitude]);
+        let summary = data.routes[0].summary;
+
+        datasource.clear();
+        datasource.add(new atlas.data.LineString(route));
+
+        // Adjust camera to fit route
+        map.setCamera({
+            bounds: atlas.data.BoundingBox.fromPositions(route),
+            padding: 50
+        });
+
+        // Save data for Analysis page
+        localStorage.setItem('routeData', JSON.stringify({
+            source: sName,
+            dest: dName,
+            distance: (summary.lengthInMeters/1000).toFixed(2),
+            time: Math.round(summary.travelTimeInSeconds/60),
+            delay: Math.round(summary.trafficDelayInSeconds/60)
+        }));
+
+        status.innerHTML = `
+            <b style="color:var(--accent)">✓ Analysis Complete</b><br>
+            Distance: ${(summary.lengthInMeters/1000).toFixed(2)} km<br>
+            Est. Time: ${Math.round(summary.travelTimeInSeconds/60)} mins<br>
+            Traffic Delay: ${Math.round(summary.trafficDelayInSeconds/60)} mins
+        `;
+
+        analysisBtn.style.display = "block";
+
+    } catch (error) {
+        status.innerHTML = "<span style='color:var(--danger)'>❌ Error: Could not establish route. Check connection.</span>";
+    }
+}
+
+initMap();
+</script>
+
+</body>
+</html>
