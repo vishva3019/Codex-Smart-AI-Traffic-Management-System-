@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEX | AI Traffic Command</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #22c55e;
+            --error: #ef4444;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Animated Traffic Flow Background */
+        .bg-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+            z-index: -1;
+        }
+
+        .traffic-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            height: 2px;
+            width: 200px;
+            opacity: 0.2;
+            animation: flow 4s linear infinite;
+        }
+
+        @keyframes flow {
+            from { transform: translateX(-100vw); }
+            to { transform: translateX(100vw); }
+        }
+
+        .login-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s ease-out;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-box {
+            font-size: 40px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px var(--primary));
+        }
+
+        h1 {
+            color: white;
+            letter-spacing: 2px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            color: #cbd5e1;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .signin-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .signin-btn:active {
+            transform: scale(0.96);
+        }
+
+        .signin-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        .biometric-area {
+            margin-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .bio-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s;
+        }
+
+        .bio-btn:hover {
+            color: white;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Animations */
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        footer {
+            color: #475569;
+            font-size: 10px;
+            text-align: center;
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow" id="trafficBg"></div>
+
+    <div class="login-card" id="card">
+        <div class="header">
+            <div class="logo-box">🚦</div>
+            <h1>CODEX <span style="font-weight: 300; font-size: 14px;">v4.2</span></h1>
+            <p class="subtitle"><span class="status-dot"></span> Bengaluru Node: Active</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group">
+                <label>ADMIN CREDENTIALS</label>
+                <input type="email" id="email" placeholder="admin@codex.ai" required>
+            </div>
+
+            <div class="input-group">
+                <label>SECURITY KEY</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="signin-btn" id="submitBtn">AUTHENTICATE</button>
+        </form>
+
+        <div class="biometric-area">
+            <button class="bio-btn" title="FaceID">👤</button>
+            <button class="bio-btn" title="Fingerprint">☝️</button>
+        </div>
+
+        <footer>
+            © 2026 CODEX TRAFFIC MANAGEMENT SYSTEM<br>
+            SECURE ACCESS GATEWAY
+        </footer>
+    </div>
+
+    <script>
+        // 1. Generate background traffic lines
+        const bg = document.getElementById('trafficBg');
+        for (let i = 0; i < 15; i++) {
+            let line = document.createElement('div');
+            line.className = 'traffic-line';
+            line.style.top = Math.random() * 100 + 'vh';
+            line.style.left = Math.random() * 100 + 'vw';
+            line.style.animationDelay = Math.random() * 5 + 's';
+            bg.appendChild(line);
+        }
+
+        const form = document.getElementById('loginForm');
+        const btn = document.getElementById('submitBtn');
+        const card = document.getElementById('card');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Get current inputs
+            const emailInput = document.getElementById('email').value;
+            const passInput = document.getElementById('password').value;
+
+            // Trigger physical haptic feel
+            if ("vibrate" in navigator) navigator.vibrate(50);
+
+            // Start authentication sequence
+            btn.disabled = true;
+            btn.innerHTML = "INITIALIZING AZURE AI...";
+            
+            setTimeout(() => {
+                btn.innerHTML = "SYNCING BENGALURU NODES...";
+                if ("vibrate" in navigator) navigator.vibrate(30);
+
+                setTimeout(() => {
+                    btn.innerHTML = "VERIFYING SECURITY KEY...";
+
+                    // THE FINAL VALIDATION
+                    if (emailInput === "admin@codex.ai" && passInput === "Bengaluru@2026") {
+                        // SUCCESS STATE
+                        btn.innerHTML = "ACCESS GRANTED";
+                        btn.style.background = "linear-gradient(135deg, #22c55e, #15803d)";
+                        if ("vibrate" in navigator) navigator.vibrate([40, 30, 40]);
+                        
+                        setTimeout(() => {
+                            window.location.href = "dashboard.html"; 
+                        }, 1000);
+                    } else {
+                        // FAIL STATE
+                        card.classList.add('shake');
+                        btn.innerHTML = "ACCESS DENIED";
+                        btn.style.background = "linear-gradient(135deg, #ef4444, #991b1b)";
+                        if ("vibrate" in navigator) navigator.vibrate([100, 50, 100]);
+
+                        setTimeout(() => {
+                            card.classList.remove('shake');
+                            btn.innerHTML = "AUTHENTICATE";
+                            btn.style.background = ""; // Reset to CSS original
+                            btn.disabled = false;
+                        }, 2000);
+                    }
+                }, 1200);
+            }, 1000);
+        });
+
+        // 3D Parallax Effect
+        document.addEventListener('mousemove', (e) => {
+            let x = (window.innerWidth / 2 - e.pageX) / 60;
+            let y = (window.innerHeight / 2 - e.pageY) / 60;
+            card.style.transform = `rotateX(${y}deg) rotateY(${-x}deg)`;
+        });
+    </script>
+</body>
+</html>
